@@ -1,0 +1,6 @@
+{
+  "name": "opencli-plugin-texpage",
+  "version": "0.1.0",
+  "description": "TeXPage online LaTeX editor: list projects, read files, compile, download PDF",
+  "opencli": ">=1.8.6"
+}
