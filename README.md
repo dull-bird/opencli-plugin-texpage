@@ -57,6 +57,26 @@ no TeXPage editor tab needs to be open.
 - Not covered: project creation/upload, sharing, version management, review
   comments.
 
+## Plan limits (free vs paid)
+
+From https://www.texpage.com/pricing — boundaries that affect this plugin:
+
+| | Free | Standard ¥18 | Professional ¥36 | Ultimate ¥59 |
+|---|---|---|---|---|
+| Compile timeout | 30s | 5min | 5min | 10min |
+| Collaborators / project | 1 | 2 | 10 | Unlimited |
+| Project versions | 2 | 5 | 10 | Unlimited |
+| Document History / Track Changes / Git / Zotero | ✗ | ✓ | ✓ | ✓ |
+| Formula Editor / Symbol Selector / Table Generator | ✓ | ✓ | ✓ | ✓ |
+
+Practical notes:
+- On the **free tier a compile is killed server-side after 30s** and returns
+  `failed:timeout` — the local `--timeout` flag cannot extend it; keep documents
+  small or upgrade.
+- The Document History *UI* is paywalled, but the underlying API still returns
+  the last ~5 file records on free tier (that is how a wiped file can be
+  restored via `/api/project/historyFile/restore`).
+
 ## How it works
 
 TeXPage has no public API docs; this plugin drives its internal frontend APIs,
