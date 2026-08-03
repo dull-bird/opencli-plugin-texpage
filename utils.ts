@@ -228,12 +228,17 @@ export async function replaceDocContent(
             for (const o of ops) {
               if (o.spliceId) maxSeqs[o.spliceId.site] = Math.max(maxSeqs[o.spliceId.site] || 0, o.spliceId.seq);
             }
-            const base = (maxSeqs[P.ownerKey] || 0) + 1;
+            // Use a fresh random siteId per write. The app uses userKey as its
+            // siteId; reusing it here would collide seq numbers with a
+            // concurrently open editor and corrupt its CRDT state
+            // ("文档数据异常" dialog + read-only editor there).
+            const site = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+            const base = 1;
             const chunks = [];
             for (let i = 0; i < P.text.length; i += CHUNK) chunks.push(P.text.slice(i, i + CHUNK));
             const outOps = [];
             chunks.forEach((chunk, i) => {
-              const spliceId = { site: P.ownerKey, seq: base + i };
+              const spliceId = { site, seq: base + i };
               const op = { type: 'splice', spliceId };
               if (i === 0) {
                 op.deletion = {
@@ -254,7 +259,7 @@ export async function replaceDocContent(
               } else {
                 op.insertion = {
                   text: chunk,
-                  leftDependencyId: { site: P.ownerKey, seq: base + i - 1 },
+                  leftDependencyId: { site, seq: base + i - 1 },
                   offsetInLeftDependency: extent(chunks[i - 1]),
                   rightDependencyId: { site: 0, seq: 1 },
                   offsetInRightDependency: { row: 0, column: 0 },
@@ -265,7 +270,7 @@ export async function replaceDocContent(
             });
             if (outOps.length === 0) {
               // Empty replacement content: single deletion-only splice
-              const spliceId = { site: P.ownerKey, seq: base };
+              const spliceId = { site, seq: base };
               expected.push(P.fileKey + '.' + spliceId.seq + '.splice');
               outOps.push({ fileKey: P.fileKey, versionNo: P.versionNo, operation: {
                 type: 'splice', spliceId,

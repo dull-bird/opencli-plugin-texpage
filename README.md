@@ -50,6 +50,12 @@ no TeXPage editor tab needs to be open.
 - `write` is a **full-content replace** of an existing file (file creation and
   partial edits are not supported yet). Each write is verified by reading the
   file back over HTTP (`verified: true`).
+- `write` uses a fresh random CRDT site id per call, so it never collides with
+  an editor session (the app itself uses your userKey as site id — reusing it
+  would corrupt a concurrently open editor's state). If the file is open in a
+  TeXPage editor tab when you write, that tab live-merges the new content and
+  may show a "当前文件已被更新 / The current file has been updated" notice;
+  dismiss it (or reload the tab) before continuing to type there.
 - `compile`: LaTeX errors still produce a PDF (nonstopmode); check `status`
   (`success` / `success-with-errors` / `failed:<errorType>`) and `errorDetail`.
 - `read -f json` on large files: opencli's JSON serializer drops oversized
